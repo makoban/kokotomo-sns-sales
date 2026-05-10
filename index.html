@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ココトモSNS | LINEでInstagram投稿をかんたん自動化</title>
+  <meta name="description" content="美容院・飲食店など個人店向け。LINEで写真とメモを送るだけで、AIが投稿文作成・画像整形・予約投稿まで支援するココトモSNSの営業説明資料。">
+  <style>
+    :root {
+      --ink: #182033;
+      --muted: #647084;
+      --line: #dbe2ea;
+      --soft: #f5f7fb;
+      --brand: #1967d2;
+      --brand-2: #13a167;
+      --warn: #c56b00;
+      --paper: #ffffff;
+      --shadow: 0 18px 50px rgba(24, 32, 51, .10);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #eef3f8;
+      line-height: 1.7;
+    }
+    a { color: var(--brand); }
+    .wrap { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    header {
+      background: linear-gradient(180deg, #ffffff 0%, #eef6ff 100%);
+      border-bottom: 1px solid var(--line);
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(340px, .95fr);
+      gap: 34px;
+      align-items: center;
+      padding: 56px 0 42px;
+    }
+    .eyebrow { color: var(--brand); font-weight: 800; margin-bottom: 8px; }
+    h1 { font-size: clamp(34px, 5vw, 58px); line-height: 1.08; margin: 0 0 16px; letter-spacing: 0; }
+    h2 { font-size: clamp(24px, 3vw, 34px); line-height: 1.25; margin: 0 0 18px; letter-spacing: 0; }
+    h3 { font-size: 20px; margin: 0 0 8px; }
+    p { margin: 0 0 14px; }
+    .lead { font-size: 18px; color: #3e4a5b; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--brand);
+      background: var(--brand);
+      color: white;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .btn.secondary { background: white; color: var(--brand); }
+    section { padding: 48px 0; }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(24, 32, 51, .06);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 13px;
+      font-weight: 800;
+      background: #e9f2ff;
+      color: #0f4fa8;
+      margin-bottom: 10px;
+    }
+    .badge.green { background: #e9f8f1; color: #087a4d; }
+    .badge.orange { background: #fff2dc; color: #8a4d00; }
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      counter-reset: step;
+    }
+    .step { position: relative; padding-top: 46px; }
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--brand);
+      color: white;
+      font-weight: 900;
+    }
+    .mock-phone {
+      width: min(360px, 100%);
+      margin: 0 auto;
+      background: #111827;
+      border-radius: 34px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    .phone-screen { background: #f7fafc; border-radius: 24px; overflow: hidden; min-height: 600px; }
+    .phone-top { background: #06c755; color: white; padding: 14px 16px; font-weight: 900; }
+    .chat { padding: 16px; display: grid; gap: 12px; }
+    .bubble { max-width: 88%; padding: 10px 12px; border-radius: 16px; background: white; border: 1px solid #e2e8f0; }
+    .bubble.me { justify-self: end; background: #dff8d8; }
+    .photo-tile { height: 160px; border-radius: 14px; background: linear-gradient(135deg, #d3edf7, #f7dce9); border: 1px solid #d1d8e0; }
+    .quick { display: flex; gap: 8px; flex-wrap: wrap; }
+    .quick span { border: 1px solid #06c755; color: #067d39; background: white; border-radius: 999px; padding: 7px 10px; font-weight: 800; font-size: 13px; }
+    .screen {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .screen-bar { display: flex; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); background: #f8fafc; font-weight: 900; }
+    .tabs { display: flex; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+    .tab { border-radius: 999px; padding: 8px 12px; background: #e8f1ff; color: #1353ac; font-weight: 900; }
+    .tab.off { background: #f1f5f9; color: #64748b; }
+    .dash { display: grid; grid-template-columns: 280px 1fr; min-height: 430px; }
+    .list { border-right: 1px solid var(--line); background: #fbfdff; }
+    .item { display: grid; grid-template-columns: 54px 1fr; gap: 10px; padding: 12px; border-bottom: 1px solid #edf1f5; }
+    .thumb { width: 54px; height: 68px; border-radius: 8px; background: linear-gradient(135deg, #cfe9ff, #ffe1ee); }
+    .line { height: 10px; border-radius: 999px; background: #dbe5ef; margin: 6px 0; }
+    .detail { padding: 18px; display: grid; gap: 14px; }
+    .settings {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #f6f9fc;
+      border: 1px solid #e2e8f0;
+    }
+    .select { background: white; border: 1px solid #dbe2ea; border-radius: 10px; padding: 10px; font-weight: 800; min-height: 44px; }
+    .image-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .image-box { aspect-ratio: 4 / 5; border-radius: 12px; background: linear-gradient(135deg, #d6ecff, #ffe6ef); border: 1px solid #d8e2ec; display: grid; place-items: end center; padding: 10px; color: #42526a; font-weight: 800; }
+    .caption { border: 1px solid #dbe2ea; border-radius: 12px; padding: 14px; background: #fff; }
+    .checklist { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
+    .checklist li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
+    .checklist li::before { content: "OK"; color: var(--brand-2); font-weight: 900; font-size: 13px; }
+    .warn { border-left: 5px solid var(--warn); }
+    .small { color: var(--muted); font-size: 14px; }
+    footer { padding: 34px 0; color: var(--muted); border-top: 1px solid var(--line); background: white; }
+    @media (max-width: 920px) {
+      .hero, .grid.two, .dash { grid-template-columns: 1fr; }
+      .grid, .flow, .settings { grid-template-columns: 1fr; }
+      .list { border-right: 0; border-bottom: 1px solid var(--line); }
+      .phone-screen { min-height: 520px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap hero">
+      <div>
+        <div class="eyebrow">美容院・飲食店・個人店向けSNS運用支援</div>
+        <h1>写真とメモをLINEで送るだけ。Instagram投稿をAIが整えて予約します。</h1>
+        <p class="lead">現場スタッフはLINEだけ。AIが写真の内容を読み取り、投稿文を作成し、必要に応じて画像をInstagram向けに整えます。投稿前の確認・予約・停止はわかりやすいDashboardで操作できます。</p>
+        <div class="cta-row">
+          <a class="btn" href="#requirements">導入に必要なものを見る</a>
+          <a class="btn secondary" href="#setup">最短セットアップを見る</a>
+        </div>
+      </div>
+      <div class="mock-phone" aria-label="LINE操作イメージ">
+        <div class="phone-screen">
+          <div class="phone-top">LINE</div>
+          <div class="chat">
+            <div class="bubble me"><div class="photo-tile"></div><p>春っぽいピンク。パラジェルおすすめで投稿して</p></div>
+            <div class="bubble">写真を受け取りました。ネイルの透明感とツヤがきれいです。準備できたら投稿して！を押してください。</div>
+            <div class="quick"><span>投稿して！</span><span>キャンセルして！</span></div>
+            <div class="bubble">投稿予定に入れました。Dashboardで写真・文章・予約時間を確認できます。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="wrap">
+        <h2>お店から見た使い方</h2>
+        <div class="flow">
+          <div class="card step"><h3>写真を送る</h3><p>施術後・料理・商品などをLINEに送ります。複数枚でも同じ投稿にまとめられます。</p></div>
+          <div class="card step"><h3>メモを送る</h3><p>「パラジェルおすすめ」「本日のランチ」など短い指示だけで十分です。</p></div>
+          <div class="card step"><h3>投稿して</h3><p>「投稿して」「インスタにあげて」などの言い方で投稿準備に進みます。</p></div>
+          <div class="card step"><h3>確認する</h3><p>Dashboardで原本画像、加工後画像、投稿文、予約時間を確認できます。</p></div>
+          <div class="card step"><h3>自動投稿</h3><p>設定した時刻になると、Instagram APIで投稿されます。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="requirements">
+      <div class="wrap">
+        <h2>自動投稿に必要なもの</h2>
+        <div class="grid two">
+          <div class="card">
+            <span class="badge green">お店が持つもの</span>
+            <ul class="checklist">
+              <li>Instagramプロアカウント。BusinessまたはCreatorが必要です。</li>
+              <li>Instagramに接続されたFacebookページ。</li>
+              <li>そのFacebookページを操作できるFacebookユーザー。</li>
+              <li>LINE公式アカウント。既存BOTを使うか、新規BOTを作ります。</li>
+              <li>2段階認証メールをすぐ確認できる状態。</li>
+            </ul>
+          </div>
+          <div class="card warn">
+            <span class="badge orange">重要</span>
+            <p><strong>完全な自動投稿にはInstagram/Meta API連携が必須です。</strong></p>
+            <p>LINEから投稿案を作ってDashboardで確認するだけならAPI連携前でも可能です。Instagramへ予約時刻に自動投稿する段階で、Meta側のアクセストークンと権限が必要になります。</p>
+            <p class="small">Meta公式ドキュメントでも、Instagram Business/Creator Account、接続済みFacebook Page、Page上で作業できるFacebook Developer accountなどが前提として示されています。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2>Dashboardの見え方</h2>
+        <div class="screen" aria-label="Dashboardスクリーンショット風イメージ">
+          <div class="screen-bar"><span>Instagram投稿キュー</span><span>ココトモSNS</span></div>
+          <div class="tabs"><span class="tab">投稿待ち 3</span><span class="tab off">投稿後 12</span></div>
+          <div class="dash">
+            <div class="list">
+              <div class="item"><div class="thumb"></div><div><div class="line" style="width:80%"></div><div class="line" style="width:60%"></div><div class="line" style="width:92%"></div></div></div>
+              <div class="item"><div class="thumb"></div><div><div class="line" style="width:70%"></div><div class="line" style="width:50%"></div><div class="line" style="width:86%"></div></div></div>
+              <div class="item"><div class="thumb"></div><div><div class="line" style="width:76%"></div><div class="line" style="width:58%"></div><div class="line" style="width:75%"></div></div></div>
+            </div>
+            <div class="detail">
+              <div class="settings">
+                <div class="select">1日 2回</div>
+                <div class="select">14:00</div>
+                <div class="select">20:00</div>
+                <div class="select">美容院</div>
+              </div>
+              <div class="image-row"><div class="image-box">原本</div><div class="image-box">加工後</div></div>
+              <div class="caption">投稿文を編集できます。保存、予約、今すぐ投稿、予約停止もここから操作できます。</div>
+            </div>
+          </div>
+        </div>
+        <p class="small">実画面では、一覧をタップすると右側または下側に詳細が出ます。設定は「かんたん設定」を基本にし、難しいプロンプト設定は管理者向けに隠します。</p>
+      </div>
+    </section>
+
+    <section id="setup">
+      <div class="wrap">
+        <h2>最短セットアップ手順</h2>
+        <div class="grid">
+          <div class="card">
+            <span class="badge">1. 事前確認</span>
+            <p>お店のInstagramがプロアカウントか、Facebookページとつながっているか、誰のFacebookで承認するかを先に確認します。</p>
+          </div>
+          <div class="card">
+            <span class="badge">2. LINE接続</span>
+            <p>専用LINE BOTを用意し、写真・メモ・投稿依頼を受け取れる状態にします。既存BOTを使う場合は対象BOTだけ特別仕様にします。</p>
+          </div>
+          <div class="card">
+            <span class="badge">3. Meta承認</span>
+            <p>正しいお店のFacebook/InstagramでOAuth承認します。個人やBANTEX側のアカウントで承認しないようにします。</p>
+          </div>
+          <div class="card">
+            <span class="badge">4. 店舗設定</span>
+            <p>業種、投稿回数、投稿時刻、画像処理を選びます。美容院ならヘア・ネイル・まつげ・眉の投稿に合わせます。</p>
+          </div>
+          <div class="card">
+            <span class="badge">5. テスト投稿</span>
+            <p>LINEから写真を送って、Dashboardに投稿案が出るか、予約投稿できるかを確認します。</p>
+          </div>
+          <div class="card">
+            <span class="badge">6. 運用開始</span>
+            <p>現場スタッフには「写真とメモを送って、最後に投稿してと送るだけ」と伝えれば運用できます。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2>失敗しないためのチェックリスト</h2>
+        <div class="grid two">
+          <div class="card">
+            <h3>Meta連携で時間を使わないために</h3>
+            <ul class="checklist">
+              <li>ログイン中のFacebookが誰のアカウントか最初に確認する。</li>
+              <li>承認するInstagramが目的のお店か確認する。</li>
+              <li>2段階認証メールを受け取れる人が同席する。</li>
+              <li>アクセストークン発行前に、FacebookページとInstagramの接続を確認する。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>プランで分ける項目</h3>
+            <ul class="checklist">
+              <li>リサイズのみ: 低コスト。画像はInstagram向けサイズに整える。</li>
+              <li>リサイズ＋AI画像加工: 有料。写真の雰囲気を上げる。</li>
+              <li>投稿回数: 1日1回または2回から選択。</li>
+              <li>業種: 美容院、飲食店、小売などから選択。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2>参考: Meta公式情報</h2>
+        <div class="card">
+          <p>Instagram API with Facebook Loginの開始条件として、MetaはInstagram Business/Creator Account、接続済みFacebook Page、Pageで作業できるFacebook Developer account、登録済みFacebook Appを挙げています。</p>
+          <p>コンテンツ公開APIはInstagramプロアカウントに画像・動画・リール・カルーセル投稿を公開するための仕組みです。実装ではメディアコンテナ作成、アップロード、公開の流れになります。</p>
+          <p class="small">参照: <a href="https://developers.facebook.com/docs/instagram-platform/instagram-api-with-facebook-login/get-started">Meta Instagram API with Facebook Login - Getting Started</a> / <a href="https://developers.facebook.com/docs/instagram-platform/content-publishing/">Meta Instagram Platform - Content Publishing</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <strong>ココトモSNS</strong><br>
+      BANTEX / 営業説明用ドラフト。CNAME設定後は独自ドメインで公開できます。
+    </div>
+  </footer>
+</body>
+</html>
